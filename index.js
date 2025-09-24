@@ -7,7 +7,11 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use(cors({credentials: true, origin: "https://arthursimplicio.github.io/teste/"}))
+const allowedOrigins = [
+  'https://arthursimplicio.github.io',
+  'https://arthursimplicio.github.io/teste/'
+];
+app.use(cors({credentials: true, origin: allowedOrigins}))
 
 app.use(express.static('public'))
 app.use('/users', UserRoutes)
