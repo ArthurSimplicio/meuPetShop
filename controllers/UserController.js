@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import { User } from '../models/User.js'
+import { createUserToken } from '../helpers/create-user-token.js'
 
 class UserController {
    static async register(req, res) {
@@ -56,12 +57,39 @@ class UserController {
 
       try {
          const newUser = await user.save()
-         res.status(201).json({
-            message: "Usuario criado",
-            newUser
-         })
+        createUserToken(newUser, req, res )
       } catch (error) {
          res.status(500).json({ message: error })
+      }
+
+   }
+
+   static async login(req, res) {
+      const {email, password} = req.body
+      if(!email){
+         res.status(422).json({
+            message: "Email obrigatorio"
+         })
+      }
+      if(!password){
+         res.status(422).json({
+            message: "Senha obrigatoria"
+         })
+      }
+
+      const user = await User.findOne({email})
+      if(!user){
+         res.status(422).json({
+            message: 'Não há usuário com esse email'
+         })
+         return
+      }
+      const checkPassword = await bcrypt.compare(password, user.password)
+      if(!checkPassword){
+         res.status(422).json({
+            message: 'Senha invalida!'
+         })
+         return
       }
 
    }
